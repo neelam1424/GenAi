@@ -5,10 +5,7 @@ import json
 
 load_dotenv()
 
-client=OpenAI(
-     api_key="AIzaSyCpLTX6QsX9FDf8EPBVRA4FPvQcstg20GY",
-    base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
-)
+client=OpenAI()
 
 
 
@@ -42,25 +39,45 @@ PLAN: {"step":"PLAN":"content":"Great, we have solved and finally left with 3.5 
 OUTPUT: {"step":"OUTPUT":"content":"3.5"}
 """
 
+print("\n\n\n")
 
 
+message_history=[
+    {"role":"system","content":SYSTEM_PROMPT},
+]
+
+user_query = input("Type here:-  ")
+message_history.append({"role":"user", "content": user_query})
 
 
-response=client.chat.completions.create(
-    model="gemini-2.5-flash",
+while True:
+    response=client.chat.completions.create(
+        model="gpt-4o-mini",
     response_format={"type":"json_object"},
-    messages=[
-        {"role":"system","content":SYSTEM_PROMPT},
-        {"role":"user", "content":"hey, write a code to add n numbers in json"},
-        {"role":"assistant","content": json.dumps({"step": "START", "content": "hey, write a code to add n numbers in json"})},
+    messages=message_history
         
-        {"role":"assistant","content": json.dumps({
-  "step": "PLAN",
-  "content": "The user wants code to add 'n' numbers, presented in JSON format. I will provide a Python solution. The plan is to: 1. Create a Python function to sum a list of numbers. 2. Include example usage. 3. Format the complete code as a string in the final JSON output."
-})}
-        
-    ]
+    )
     
-)
+    
+    raw_result = response.choices[0].message.content
+    message_history.append({"role":"assistant", "content":raw_result})
+    
+    parsed_result= json.loads(raw_result)
+    
+    if parsed_result.get("step") == "START":
+        print("Starting ",parsed_result.get("content"))
+        continue
+    
+    if parsed_result.get("step") == "PLAN":
+        print("Planing ",parsed_result.get("content"))
+        continue
+    
+    if parsed_result.get("step") == "OUTPUT":
+        print("Output" ,parsed_result.get("content"))
+        break
+    
+print("\n\n\n")
 
-print(response.choices[0].message.content)
+
+    
+
