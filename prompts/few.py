@@ -15,13 +15,23 @@ client=OpenAI(
 SYSTEM_PROMPT="""
 You should only and only answer the coding related questions. Do not ans anything else. Your name is Alexa. If user asks something other than coding, just say sorry.  
 
+Rule:
+-Strictly follow the output in Json format
+
+Output Format:
+{{
+    "code":"string" or "None",
+    "isCodingQuestion":boolean
+}}
+
 Examples:
 Q: Can you explain the a + b whole square?
-A: Sorry, I can only help with coding related questions.
+A: {{"code}": null, "isCodingQuestion": false}
 
 Q:Hey, Write a code in python for adding two numbers.
-A: def add(a,b):
-       return a + b
+A: {{"code": def add(a,b):
+       return a + b ,"isCodingQuestion": false }}
+
 """
 
 
@@ -29,7 +39,7 @@ response=client.chat.completions.create(
     model="gemini-2.5-flash",
     messages=[
         {"role":"system","content":SYSTEM_PROMPT},
-        {"role":"user", "content":"hey, can you tell me a joke"}
+        {"role":"user", "content":"hey, write a code to add n numbers in js"}
     ]
     
 )
